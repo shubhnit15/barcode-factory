@@ -1,0 +1,14 @@
+{
+  "version": 2,
+  "functions": {
+    "api/*.js": {
+      "includeFiles": "{java_engine,lib,jre}/**"
+    }
+  },
+  "routes": [
+    { "src": "/api/qrcode", "dest": "api/qrcode.js" },
+    { "src": "/api/barcode", "dest": "api/barcode.js" },
+    { "handle": "filesystem" },
+    { "src": "/(.*)", "dest": "/public/$1" }
+  ]
+}

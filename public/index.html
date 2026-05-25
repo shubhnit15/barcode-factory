@@ -1,0 +1,782 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dynamic QR Code & Barcode Factory</title>
+    <!-- Modern Premium Typography -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Outfit:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    
+    <style>
+        :root {
+            --bg-base: #0a0b10;
+            --bg-surface: rgba(25, 28, 41, 0.45);
+            --bg-surface-glow: rgba(35, 40, 60, 0.7);
+            --border-glow: rgba(255, 255, 255, 0.08);
+            --primary: #6366f1;
+            --primary-glow: rgba(99, 102, 241, 0.35);
+            --accent: #14b8a6;
+            --accent-glow: rgba(20, 184, 166, 0.35);
+            --text-main: #f3f4f6;
+            --text-muted: #9ca3af;
+            --glass-blur: blur(12px);
+            --transition-smooth: all 0.35s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            background-color: var(--bg-base);
+            color: var(--text-main);
+            font-family: 'Inter', sans-serif;
+            min-height: 100vh;
+            overflow-x: hidden;
+            display: flex;
+            flex-direction: column;
+            background-image: 
+                radial-gradient(circle at 10% 20%, rgba(99, 102, 241, 0.08) 0%, transparent 40%),
+                radial-gradient(circle at 90% 80%, rgba(20, 184, 166, 0.06) 0%, transparent 40%);
+        }
+
+        header {
+            max-width: 1200px;
+            width: 100%;
+            margin: 0 auto;
+            padding: 2.5rem 1.5rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .logo-container {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+        }
+
+        .logo-icon {
+            width: 2.5rem;
+            height: 2.5rem;
+            background: linear-gradient(135deg, var(--primary), var(--accent));
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 800;
+            color: #ffffff;
+            font-family: 'Outfit', sans-serif;
+            box-shadow: 0 0 15px var(--primary-glow);
+        }
+
+        h1 {
+            font-family: 'Outfit', sans-serif;
+            font-size: 1.5rem;
+            font-weight: 700;
+            letter-spacing: -0.02em;
+            background: linear-gradient(135deg, #ffffff 30%, var(--text-muted));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .status-badge {
+            background: rgba(20, 184, 166, 0.1);
+            border: 1px solid rgba(20, 184, 166, 0.2);
+            color: var(--accent);
+            padding: 0.35rem 0.85rem;
+            border-radius: 20px;
+            font-size: 0.75rem;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 0.35rem;
+            box-shadow: 0 0 10px rgba(20, 184, 166, 0.05);
+        }
+
+        .status-dot {
+            width: 6px;
+            height: 6px;
+            background-color: var(--accent);
+            border-radius: 50%;
+            display: inline-block;
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+            0% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(20, 184, 166, 0.7); }
+            70% { transform: scale(1); box-shadow: 0 0 0 6px rgba(20, 184, 166, 0); }
+            100% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(20, 184, 166, 0); }
+        }
+
+        main {
+            max-width: 1200px;
+            width: 100%;
+            margin: 0 auto;
+            padding: 0 1.5rem 4rem 1.5rem;
+            flex-grow: 1;
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 2rem;
+        }
+
+        @media (max-width: 900px) {
+            main {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        .panel {
+            background: var(--bg-surface);
+            border: 1px solid var(--border-glow);
+            border-radius: 24px;
+            backdrop-filter: var(--glass-blur);
+            padding: 2rem;
+            display: flex;
+            flex-direction: column;
+            box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.2);
+            transition: var(--transition-smooth);
+        }
+
+        .panel:hover {
+            border-color: rgba(255, 255, 255, 0.12);
+            box-shadow: 0 12px 40px 0 rgba(0, 0, 0, 0.25);
+        }
+
+        .tabs {
+            display: flex;
+            background: rgba(0, 0, 0, 0.25);
+            border-radius: 12px;
+            padding: 0.35rem;
+            margin-bottom: 2rem;
+        }
+
+        .tab-btn {
+            flex: 1;
+            background: none;
+            border: none;
+            color: var(--text-muted);
+            padding: 0.75rem;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 0.9rem;
+            font-weight: 600;
+            font-family: 'Outfit', sans-serif;
+            transition: var(--transition-smooth);
+        }
+
+        .tab-btn.active {
+            background: var(--primary);
+            color: #ffffff;
+            box-shadow: 0 4px 12px var(--primary-glow);
+        }
+
+        .form-group {
+            margin-bottom: 1.5rem;
+        }
+
+        label {
+            display: block;
+            font-size: 0.8rem;
+            font-weight: 600;
+            color: var(--text-muted);
+            margin-bottom: 0.5rem;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+
+        input[type="text"], select {
+            width: 100%;
+            background: rgba(0, 0, 0, 0.3);
+            border: 1px solid var(--border-glow);
+            border-radius: 12px;
+            padding: 0.85rem 1rem;
+            color: #ffffff;
+            font-size: 0.95rem;
+            outline: none;
+            transition: var(--transition-smooth);
+        }
+
+        input[type="text"]:focus, select:focus {
+            border-color: var(--primary);
+            box-shadow: 0 0 0 3px var(--primary-glow);
+            background: rgba(0, 0, 0, 0.4);
+        }
+
+        .range-container {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        input[type="range"] {
+            flex-grow: 1;
+            accent-color: var(--primary);
+        }
+
+        .range-val {
+            font-family: monospace;
+            font-size: 0.9rem;
+            background: rgba(0, 0, 0, 0.2);
+            padding: 0.25rem 0.5rem;
+            border-radius: 6px;
+            min-width: 3.5rem;
+            text-align: center;
+        }
+
+        .colors-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 1rem;
+        }
+
+        .color-input-wrapper {
+            display: flex;
+            align-items: center;
+            background: rgba(0, 0, 0, 0.3);
+            border: 1px solid var(--border-glow);
+            border-radius: 12px;
+            padding: 0.5rem 0.75rem;
+            gap: 0.5rem;
+        }
+
+        .color-input-wrapper input[type="color"] {
+            background: none;
+            border: none;
+            width: 2rem;
+            height: 2.2rem;
+            cursor: pointer;
+            outline: none;
+        }
+
+        .color-input-wrapper input[type="text"] {
+            border: none;
+            background: none;
+            padding: 0;
+            font-family: monospace;
+            text-transform: uppercase;
+        }
+
+        .presets-title {
+            font-size: 0.75rem;
+            color: var(--text-muted);
+            margin: 1.25rem 0 0.5rem 0;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+
+        .presets-flex {
+            display: flex;
+            gap: 0.5rem;
+            flex-wrap: wrap;
+        }
+
+        .preset-btn {
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid var(--border-glow);
+            color: var(--text-main);
+            padding: 0.4rem 0.8rem;
+            border-radius: 8px;
+            font-size: 0.75rem;
+            cursor: pointer;
+            font-weight: 500;
+            transition: var(--transition-smooth);
+        }
+
+        .preset-btn:hover {
+            background: rgba(255, 255, 255, 0.1);
+            border-color: rgba(255, 255, 255, 0.2);
+        }
+
+        .preview-panel {
+            justify-content: center;
+            align-items: center;
+            min-height: 400px;
+            background: radial-gradient(circle at center, rgba(25, 28, 41, 0.3) 0%, rgba(10, 11, 16, 0.8) 100%), var(--bg-surface);
+            position: relative;
+        }
+
+        .preview-container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            gap: 1.5rem;
+            width: 100%;
+        }
+
+        .preview-box {
+            background: rgba(0, 0, 0, 0.4);
+            border: 2px dashed rgba(255, 255, 255, 0.1);
+            border-radius: 16px;
+            width: 250px;
+            height: 250px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            overflow: hidden;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+            position: relative;
+            transition: var(--transition-smooth);
+        }
+
+        .preview-box.barcode-view {
+            width: 100%;
+            max-width: 400px;
+            height: 180px;
+        }
+
+        .preview-img {
+            max-width: 90%;
+            max-height: 90%;
+            object-fit: contain;
+            border-radius: 8px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.4);
+            display: none;
+            transition: var(--transition-smooth);
+        }
+
+        .preview-placeholder {
+            color: var(--text-muted);
+            text-align: center;
+            padding: 1.5rem;
+            font-size: 0.85rem;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 0.75rem;
+        }
+
+        .preview-placeholder svg {
+            width: 3rem;
+            height: 3rem;
+            stroke: var(--text-muted);
+            opacity: 0.6;
+        }
+
+        .loader {
+            position: absolute;
+            width: 30px;
+            height: 30px;
+            border: 3px solid rgba(99, 102, 241, 0.2);
+            border-top: 3px solid var(--primary);
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            display: none;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .action-buttons {
+            display: flex;
+            gap: 1rem;
+            width: 100%;
+            margin-top: 1rem;
+        }
+
+        .btn {
+            flex: 1;
+            padding: 0.85rem;
+            border-radius: 12px;
+            border: none;
+            font-family: 'Outfit', sans-serif;
+            font-size: 0.95rem;
+            font-weight: 600;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.5rem;
+            transition: var(--transition-smooth);
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, var(--primary), #4f46e5);
+            color: #ffffff;
+            box-shadow: 0 4px 15px var(--primary-glow);
+        }
+
+        .btn-primary:hover {
+            box-shadow: 0 6px 20px var(--primary-glow);
+            transform: translateY(-1px);
+        }
+
+        .btn-secondary {
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid var(--border-glow);
+            color: var(--text-main);
+        }
+
+        .btn-secondary:hover {
+            background: rgba(255, 255, 255, 0.08);
+            border-color: rgba(255, 255, 255, 0.15);
+        }
+
+        .btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+            transform: none !important;
+            box-shadow: none !important;
+        }
+
+        .toast {
+            position: fixed;
+            bottom: 2rem;
+            right: 2rem;
+            background: rgba(20, 184, 166, 0.9);
+            color: #ffffff;
+            padding: 0.75rem 1.5rem;
+            border-radius: 12px;
+            font-size: 0.85rem;
+            font-weight: 600;
+            box-shadow: 0 8px 24px rgba(0, 0, 0, 0.35);
+            backdrop-filter: blur(8px);
+            z-index: 1000;
+            opacity: 0;
+            transform: translateY(10px);
+            transition: var(--transition-smooth);
+            pointer-events: none;
+        }
+
+        .toast.show {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        /* Mock Scanning HUD Overlay */
+        .scan-overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            border-radius: 16px;
+            opacity: 0;
+            transition: var(--transition-smooth);
+        }
+
+        .scan-overlay.active {
+            opacity: 1;
+        }
+
+        .scan-line {
+            position: absolute;
+            width: 100%;
+            height: 2px;
+            background: linear-gradient(to right, transparent, var(--accent), transparent);
+            top: 0;
+            animation: scan-anim 2.5s ease-in-out infinite;
+        }
+
+        @keyframes scan-anim {
+            0% { top: 5%; }
+            50% { top: 95%; }
+            100% { top: 5%; }
+        }
+
+        .corner {
+            position: absolute;
+            width: 16px;
+            height: 16px;
+            border: 2px solid var(--accent);
+            opacity: 0.6;
+        }
+
+        .tl { top: 8px; left: 8px; border-right: none; border-bottom: none; }
+        .tr { top: 8px; right: 8px; border-left: none; border-bottom: none; }
+        .bl { bottom: 8px; left: 8px; border-right: none; border-top: none; }
+        .br { bottom: 8px; right: 8px; border-left: none; border-top: none; }
+    </style>
+</head>
+<body>
+
+    <header>
+        <div class="logo-container">
+            <div class="logo-icon">F</div>
+            <h1>CODE FACTORY</h1>
+        </div>
+        <div class="status-badge">
+            <span class="status-dot"></span>
+            <span>Stateless API Online</span>
+        </div>
+    </header>
+
+    <main>
+        <!-- Panel 1: Controls -->
+        <section class="panel">
+            <div class="tabs">
+                <button class="tab-btn active" onclick="switchTab('qr')">QR CODE</button>
+                <button class="tab-btn" onclick="switchTab('barcode')">BARCODE</button>
+            </div>
+
+            <!-- QR Code Controls -->
+            <div id="qr-controls">
+                <div class="form-group">
+                    <label for="qr-data">Encode Content (URL or Text)</label>
+                    <input type="text" id="qr-data" placeholder="e.g. https://google.com" value="https://google.com">
+                </div>
+                
+                <div class="form-group">
+                    <label for="qr-size">Size (Pixels)</label>
+                    <div class="range-container">
+                        <input type="range" id="qr-size" min="100" max="800" step="10" value="300">
+                        <span class="range-val" id="qr-size-val">300px</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Barcode Controls -->
+            <div id="barcode-controls" style="display: none;">
+                <div class="form-group">
+                    <label for="bar-data">Barcode Content</label>
+                    <input type="text" id="bar-data" placeholder="e.g. 123456789012" value="123456789012">
+                </div>
+
+                <div class="form-group">
+                    <label for="bar-format">Symbology Format</label>
+                    <select id="bar-format">
+                        <option value="CODE_128">CODE_128 (Alpha-numeric standard)</option>
+                        <option value="CODE_39">CODE_39 (Industrial standard)</option>
+                        <option value="EAN_13">EAN_13 (13-digit product bar)</option>
+                        <option value="EAN_8">EAN_8 (8-digit product bar)</option>
+                        <option value="UPC_A">UPC_A (US Retail standard)</option>
+                        <option value="CODABAR">CODABAR (Legacy/Libraries)</option>
+                        <option value="PDF_417">PDF_417 (High density 2D)</option>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label for="bar-width">Width</label>
+                    <div class="range-container">
+                        <input type="range" id="bar-width" min="150" max="1000" step="10" value="400">
+                        <span class="range-val" id="bar-width-val">400px</span>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label for="bar-height">Height</label>
+                    <div class="range-container">
+                        <input type="range" id="bar-height" min="40" max="600" step="5" value="120">
+                        <span class="range-val" id="bar-height-val">120px</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Unified Color Controllers -->
+            <div class="form-group">
+                <label>Factory Custom Styling</label>
+                <div class="colors-grid">
+                    <div>
+                        <span style="font-size: 0.75rem; color: var(--text-muted); display:block; margin-bottom:0.25rem;">Foreground</span>
+                        <div class="color-input-wrapper">
+                            <input type="color" id="fg-picker" value="#000000">
+                            <input type="text" id="fg-hex" value="#000000">
+                        </div>
+                    </div>
+                    <div>
+                        <span style="font-size: 0.75rem; color: var(--text-muted); display:block; margin-bottom:0.25rem;">Background</span>
+                        <div class="color-input-wrapper">
+                            <input type="color" id="bg-picker" value="#ffffff">
+                            <input type="text" id="bg-hex" value="#ffffff">
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="presets-title">Quick Color Theme Presets</div>
+                <div class="presets-flex">
+                    <button class="preset-btn" onclick="applyPreset('#000000', '#ffffff')">Classic Monochromatic</button>
+                    <button class="preset-btn" onclick="applyPreset('#6366f1', '#0a0b10')">Cyber Indigo (Dark)</button>
+                    <button class="preset-btn" onclick="applyPreset('#14b8a6', '#052e16')">Emerald Forest</button>
+                    <button class="preset-btn" onclick="applyPreset('#f43f5e', '#fff1f2')">Ruby Red Rose</button>
+                </div>
+            </div>
+
+            <div class="action-buttons">
+                <button class="btn btn-secondary" onclick="resetForm()">Reset Settings</button>
+                <button class="btn btn-primary" onclick="generateCode()">Generate Factory stream</button>
+            </div>
+        </section>
+
+        <!-- Panel 2: Live Preview & Simulated Scanner -->
+        <section class="panel preview-panel">
+            <div class="preview-container">
+                <div class="preview-box" id="preview-frame">
+                    <!-- Scanning HUD -->
+                    <div class="scan-overlay" id="scan-hud">
+                        <div class="scan-line"></div>
+                        <div class="corner tl"></div>
+                        <div class="corner tr"></div>
+                        <div class="corner bl"></div>
+                        <div class="corner br"></div>
+                    </div>
+                    
+                    <div class="loader" id="preview-loader"></div>
+                    
+                    <div class="preview-placeholder" id="placeholder-text">
+                        <svg fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M12 4v1m6 11h2m-6 0h-2v4m0-11v3m0 0h.01M12 12h4.01M16 20h4M4 12h4m12 0h.01M5 8h2a1 1 0 001-1V5a1 1 0 00-1-1H5a1 1 0 00-1 1v2a1 1 0 001 1zm12 0h2a1 1 0 001-1V5a1 1 0 00-1-1h-2a1 1 0 00-1 1v2a1 1 0 001 1zM5 20h2a1 1 0 001-1v-2a1 1 0 00-1-1H5a1 1 0 00-1 1v2a1 1 0 001 1z" />
+                        </svg>
+                        <span>Select parameters and click "Generate Factory stream" to pull a sample image stream from the edge cache</span>
+                    </div>
+                    
+                    <img id="preview-img" class="preview-img" alt="Generated Stream">
+                </div>
+
+                <div class="action-buttons" style="max-width: 400px; width: 100%;">
+                    <button class="btn btn-secondary" id="btn-copy-url" onclick="copyApiUrl()" disabled>Copy Endpoint URL</button>
+                    <button class="btn btn-primary" id="btn-scan" onclick="triggerScanHud()" disabled>Test Scan HUD</button>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <div class="toast" id="toast">Copied live endpoint URL to clipboard!</div>
+
+    <script>
+        let currentTab = 'qr';
+        let generatedUrl = '';
+
+        // Synchronize numeric labels
+        document.getElementById('qr-size').addEventListener('input', (e) => {
+            document.getElementById('qr-size-val').textContent = e.target.value + 'px';
+        });
+        document.getElementById('bar-width').addEventListener('input', (e) => {
+            document.getElementById('bar-width-val').textContent = e.target.value + 'px';
+        });
+        document.getElementById('bar-height').addEventListener('input', (e) => {
+            document.getElementById('bar-height-val').textContent = e.target.value + 'px';
+        });
+
+        // Sync color pickers and text inputs
+        const fgPicker = document.getElementById('fg-picker');
+        const fgHex = document.getElementById('fg-hex');
+        const bgPicker = document.getElementById('bg-picker');
+        const bgHex = document.getElementById('bg-hex');
+
+        fgPicker.addEventListener('input', (e) => fgHex.value = e.target.value);
+        fgHex.addEventListener('input', (e) => {
+            if(/^#[0-9A-F]{6}$/i.test(e.target.value)) {
+                fgPicker.value = e.target.value;
+            }
+        });
+
+        bgPicker.addEventListener('input', (e) => bgHex.value = e.target.value);
+        bgHex.addEventListener('input', (e) => {
+            if(/^#[0-9A-F]{6}$/i.test(e.target.value)) {
+                bgPicker.value = e.target.value;
+            }
+        });
+
+        function switchTab(tab) {
+            currentTab = tab;
+            const buttons = document.querySelectorAll('.tab-btn');
+            buttons.forEach(btn => btn.classList.remove('active'));
+            
+            const frame = document.getElementById('preview-frame');
+            
+            if (tab === 'qr') {
+                buttons[0].classList.add('active');
+                document.getElementById('qr-controls').style.display = 'block';
+                document.getElementById('barcode-controls').style.display = 'none';
+                frame.classList.remove('barcode-view');
+            } else {
+                buttons[1].classList.add('active');
+                document.getElementById('qr-controls').style.display = 'none';
+                document.getElementById('barcode-controls').style.display = 'block';
+                frame.classList.add('barcode-view');
+            }
+        }
+
+        function applyPreset(fg, bg) {
+            fgPicker.value = fg;
+            fgHex.value = fg;
+            bgPicker.value = bg;
+            bgHex.value = bg;
+        }
+
+        function resetForm() {
+            document.getElementById('qr-data').value = 'https://google.com';
+            document.getElementById('qr-size').value = 300;
+            document.getElementById('qr-size-val').textContent = '300px';
+
+            document.getElementById('bar-data').value = '123456789012';
+            document.getElementById('bar-format').value = 'CODE_128';
+            document.getElementById('bar-width').value = 400;
+            document.getElementById('bar-width-val').textContent = '400px';
+            document.getElementById('bar-height').value = 120;
+            document.getElementById('bar-height-val').textContent = '120px';
+
+            applyPreset('#000000', '#ffffff');
+        }
+
+        function generateCode() {
+            const loader = document.getElementById('preview-loader');
+            const placeholder = document.getElementById('placeholder-text');
+            const img = document.getElementById('preview-img');
+            
+            loader.style.display = 'block';
+            img.style.display = 'none';
+            placeholder.style.display = 'none';
+
+            let apiPath = '';
+            const fgClean = fgHex.value.replace('#', '');
+            const bgClean = bgHex.value.replace('#', '');
+
+            if (currentTab === 'qr') {
+                const data = encodeURIComponent(document.getElementById('qr-data').value);
+                const size = document.getElementById('qr-size').value;
+                apiPath = `/api/qrcode?data=${data}&size=${size}&fg=${fgClean}&bg=${bgClean}`;
+            } else {
+                const data = encodeURIComponent(document.getElementById('bar-data').value);
+                const format = document.getElementById('bar-format').value;
+                const width = document.getElementById('bar-width').value;
+                const height = document.getElementById('bar-height').value;
+                apiPath = `/api/barcode?data=${data}&format=${format}&width=${width}&height=${height}&fg=${fgClean}&bg=${bgClean}`;
+            }
+
+            // Create target URL
+            generatedUrl = window.location.origin + apiPath;
+
+            // Load Image
+            img.src = apiPath;
+            img.onload = () => {
+                loader.style.display = 'none';
+                img.style.display = 'block';
+                document.getElementById('btn-copy-url').disabled = false;
+                document.getElementById('btn-scan').disabled = false;
+            };
+            img.onerror = () => {
+                loader.style.display = 'none';
+                placeholder.style.display = 'flex';
+                placeholder.querySelector('span').textContent = 'API Error: Verify input format requirements.';
+                document.getElementById('btn-copy-url').disabled = true;
+                document.getElementById('btn-scan').disabled = true;
+            };
+        }
+
+        function copyApiUrl() {
+            navigator.clipboard.writeText(generatedUrl).then(() => {
+                const toast = document.getElementById('toast');
+                toast.classList.add('show');
+                setTimeout(() => toast.classList.remove('show'), 2500);
+            });
+        }
+
+        function triggerScanHud() {
+            const hud = document.getElementById('scan-hud');
+            hud.classList.add('active');
+            setTimeout(() => {
+                hud.classList.remove('active');
+            }, 5000);
+        }
+    </script>
+</body>
+</html>

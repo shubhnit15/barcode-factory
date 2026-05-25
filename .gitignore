@@ -1,0 +1,16 @@
+# Dependencies
+node_modules/
+lib/
+
+# Portable JRE
+jre/
+
+# Vercel deployments and configurations
+.vercel/
+
+# System / IDE specific files
+.DS_Store
+Thumbs.db
+.idea/
+.vscode/
+*.log
