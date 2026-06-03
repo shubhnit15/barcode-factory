@@ -60,28 +60,10 @@
             gap: 0.75rem;
         }
 
-        .logo-icon {
-            width: 2.5rem;
-            height: 2.5rem;
-            background: linear-gradient(135deg, var(--primary), var(--accent));
-            border-radius: 8px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-weight: 800;
-            color: #ffffff;
-            font-family: 'Outfit', sans-serif;
-            box-shadow: 0 0 15px var(--primary-glow);
-        }
-
-        h1 {
-            font-family: 'Outfit', sans-serif;
-            font-size: 1.5rem;
-            font-weight: 700;
-            letter-spacing: -0.02em;
-            background: linear-gradient(135deg, #ffffff 30%, var(--text-muted));
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
+        .logo-img {
+            height: 3.5rem;
+            width: auto;
+            object-fit: contain;
         }
 
         .status-badge {
@@ -502,8 +484,8 @@
                 flex-direction: row;
                 gap: 1rem;
             }
-            h1 {
-                font-size: 1.25rem;
+            .logo-img {
+                height: 2.5rem;
             }
             main {
                 padding: 0 1rem 3rem 1rem;
@@ -574,8 +556,7 @@
 
     <header>
         <div class="logo-container">
-            <div class="logo-icon">F</div>
-            <h1>CODE FACTORY</h1>
+            <img src="/logo.png" alt="Barcode Factory Logo" class="logo-img">
         </div>
         <div class="status-badge">
             <span class="status-dot"></span>
